@@ -38,4 +38,10 @@ const goFullscreen = (element) => {
   // .. and do nothing if the method is not supported
 };
 
-export { makeColor, getRandomColor, getLinearGradient, goFullscreen };
+const getDate = () => {
+  let date = new Date();
+  let dateString = `${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+  return dateString;
+}
+
+export { makeColor, getRandomColor, getLinearGradient, goFullscreen, getDate };

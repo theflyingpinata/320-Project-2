@@ -12,12 +12,14 @@ import * as audio from './audio.js';
 import * as canvas from './canvas.js';
 
 const drawParams = {
-  showGradient: true,
-  showBars: true,
-  showCircles: true,
+  showGradient: false,
+  showBars: false,
+  showCircles: false,
   showNoise: false,
   showInvert: false,
   showEmboss: false,
+  showBarCircle: true,
+  showDate: true,
 }
 
 // 1 - here we are faking an enumeration
@@ -114,6 +116,12 @@ function setupUI(canvasElement) {
   };
   document.querySelector('#embossCB').onchange = e => {
     drawParams.showEmboss = e.target.checked;
+  };
+  document.querySelector('#barCircleCB').onchange = e => {
+    drawParams.showBarCircle = e.target.checked;
+  };
+  document.querySelector('#dateCB').onchange = e => {
+    drawParams.showDate = e.target.checked;
   };
 
 } // end setupUI
