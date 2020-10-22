@@ -3,7 +3,7 @@ let audioCtx;
 
 // **These are "private" properties - these will NOT be visible outside of this module (i.e. file)**
 // 2 - WebAudio nodes that are part of our WebAudio audio routing graph
-let element, sourceNode, analyserNode, gainNode;
+let element, sourceNode, analyserNode, gainNode, compressor;
 
 // 3 - here we are faking an enumeration
 const DEFAULTS = Object.freeze({
@@ -52,10 +52,22 @@ function setupWebaudio(filePath) {
     gainNode = audioCtx.createGain();
     gainNode.gain.value = DEFAULTS.gain;
 
+    // Create a compressor node
+    compressor = audioCtx.createDynamicsCompressor();
+    compressor.threshold.value = -70;
+    compressor.knee.value = 40;
+    compressor.ratio.value = 24;
+    compressor.attack.value = 0.20;
+    compressor.release.value = 0.25;
+    
+    // connect the AudioBufferSourceNode to the destination
+    //source.connect(audioCtx.destination);
+
     // 8 - connect the nodes - we now have an audio graph
     sourceNode.connect(analyserNode);
     analyserNode.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    gainNode.connect(compressor);
+    compressor.connect(audioCtx.destination);
 }
 
 function loadSoundFile(filePath) {

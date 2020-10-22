@@ -13,7 +13,7 @@ const getRandom = (min, max) => {
 const getRandomColor = () => {
   const floor = 35; // so that colors are not too bright or too dark 
   const getByte = () => getRandom(floor, 255 - floor);
-  return `rgba(${getByte()},${getByte()},${getByte()},1)`;
+  return `rgba(${getByte()},${getByte()},${getByte()},.5)`;
 };
 
 const getLinearGradient = (ctx, startX, startY, endX, endY, colorStops) => {
@@ -40,8 +40,39 @@ const goFullscreen = (element) => {
 
 const getDate = () => {
   let date = new Date();
-  let dateString = `${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+  let month = date.getMonth();
+  let day = date.getDate();
+  let year = date.getFullYear();
+
+  if (month < 10) month = "0" + month.toString();
+  if (day < 10) day = "0" + day.toString();
+
+  let dateString = `${month}/${day}/${year}`;
   return dateString;
 }
 
-export { makeColor, getRandomColor, getLinearGradient, goFullscreen, getDate };
+const getTime = () => {
+  let date = new Date();
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let seconds = date.getSeconds();
+
+  if (hours > 12) hours = hours % 12;
+  if (hours < 10) hours = "0" + hours.toString();
+  if (minutes < 10) minutes = "0" + minutes.toString();
+  if (seconds < 10) seconds = "0" + seconds.toString();
+
+  let timeString = `${hours}:${minutes}:${seconds}`;
+  return timeString;
+}
+
+const lerp = (value1, value2, percent) => {
+  if (percent < 0)
+    percent = 0;
+  else if(percent > 1)
+    percent = 1;
+
+  return (1 - percent) * value1 + percent * value2;
+}
+
+export { makeColor, getRandomColor, getLinearGradient, goFullscreen, getDate, getTime, getRandom, lerp };

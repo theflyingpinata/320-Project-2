@@ -20,11 +20,13 @@ const drawParams = {
   showEmboss: false,
   showBarCircle: true,
   showDate: true,
+  showConfetti: false,
+  showBounce: true,
 }
 
 // 1 - here we are faking an enumeration
 const DEFAULTS = Object.freeze({
-  sound1: "media/New Adventure Theme.mp3"
+  sound1: "media/Koi no Uta.mp3"
 });
 
 function init() {
@@ -122,6 +124,9 @@ function setupUI(canvasElement) {
   };
   document.querySelector('#dateCB').onchange = e => {
     drawParams.showDate = e.target.checked;
+  };
+    document.querySelector('#bounceCB').onchange = e => {
+    drawParams.showBounce = e.target.checked;
   };
 
 } // end setupUI
