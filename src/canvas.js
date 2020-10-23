@@ -17,7 +17,7 @@ let isBouncing = false;
 
 const KICK_FREQUENCY_START = 1;
 const KICK_FREQUENCY_END = 6;
-const KICK_BOUNCE_THRESHOLD = 230;
+const KICK_BOUNCE_THRESHOLD = 220;
 const AUDIODATA_MAX_VOLUME = 256;
 
 function setupCanvas(canvasElement, analyserNodeRef) {

@@ -55,8 +55,8 @@ function setupWebaudio(filePath) {
     // Create a compressor node
     compressor = audioCtx.createDynamicsCompressor();
     compressor.threshold.value = -70;
-    compressor.knee.value = 40;
-    compressor.ratio.value = 24;
+    compressor.knee.value = 20;
+    compressor.ratio.value = 18;
     compressor.attack.value = 0.20;
     compressor.release.value = 0.25;
     
