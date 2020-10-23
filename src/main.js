@@ -20,9 +20,13 @@ const drawParams = {
   showEmboss: false,
   showBarCircle: true,
   showDate: true,
-  showConfetti: false,
+  showConfetti: true,
   showBounce: true,
+  showWaveform: false,
+  showPixels: true,
 }
+
+let waveformHeight = 200;
 
 // 1 - here we are faking an enumeration
 const DEFAULTS = Object.freeze({
@@ -87,6 +91,20 @@ function setupUI(canvasElement) {
   // set value of label to match initial value of slider
   volumeSlider.dispatchEvent(new Event("input"));
 
+  // Hookup volume slider & label
+  let waveformSlider = document.querySelector("#waveformSlider");
+  let waveformLabel = document.querySelector("#waveformLabel");
+
+  // add .oninput event to slider
+  waveformSlider.oninput = e => {
+    waveformHeight = waveformSlider.value;
+    // update value of label to match value of slider
+    waveformLabel.innerHTML = waveformSlider.max - e.target.value;
+  };
+
+  // set value of label to match initial value of slider
+  waveformSlider.dispatchEvent(new Event("input"));
+
 
   // hookup track <select>
   let trackSelect = document.querySelector("#trackSelect");
@@ -125,8 +143,17 @@ function setupUI(canvasElement) {
   document.querySelector('#dateCB').onchange = e => {
     drawParams.showDate = e.target.checked;
   };
-    document.querySelector('#bounceCB').onchange = e => {
+  document.querySelector('#bounceCB').onchange = e => {
     drawParams.showBounce = e.target.checked;
+  };
+  document.querySelector('#confettiCB').onchange = e => {
+    drawParams.showConfetti = e.target.checked;
+  };
+  document.querySelector('#waveformCB').onchange = e => {
+    drawParams.showWaveform = e.target.checked;
+  };
+  document.querySelector('#pixelsCB').onchange = e => {
+    drawParams.showPixels = e.target.checked;
   };
 
 } // end setupUI
@@ -134,7 +161,7 @@ function setupUI(canvasElement) {
 function loop() {
   /* NOTE: This is temporary testing code that we will delete in Part II */
   requestAnimationFrame(loop);
-  canvas.draw(drawParams);
+  canvas.draw(drawParams, waveformHeight);
 }
 
 export { init };

@@ -15,7 +15,10 @@ let colorRotation = 0;
 let bounceLerpPercent = 0;
 let isBouncing = false;
 
-const KICK_FREQUENCY_INDECIES = 5;
+const KICK_FREQUENCY_START = 1;
+const KICK_FREQUENCY_END = 6;
+const KICK_BOUNCE_THRESHOLD = 230;
+const AUDIODATA_MAX_VOLUME = 256;
 
 function setupCanvas(canvasElement, analyserNodeRef) {
     // create drawing context
@@ -32,7 +35,7 @@ function setupCanvas(canvasElement, analyserNodeRef) {
     audioData = new Uint8Array(bufferLength);
 }
 
-function draw(params = {}) {
+function draw(params = {}, waveformHeight) {
     // 1 - populate the audioData array with the frequency data from the analyserNode
     // notice these arrays are passed "by reference" 
     analyserNode.getByteFrequencyData(audioData);
@@ -73,47 +76,32 @@ function draw(params = {}) {
         if (params.showBounce) {
             let kickAvgVolume = 0;  // Average volume of the kick frequencies (100Hz - 1.3K Hz)
             let newRadius;  // New radius to lerp to when a kick happens
+            let radiusDifference;
 
             // Calcualte average kick volume
-            for (let i = 0; i < KICK_FREQUENCY_INDECIES; i++) {
+            for (let i = KICK_FREQUENCY_START; i < KICK_FREQUENCY_END; i++) {
                 kickAvgVolume += audioData[i];
             }
 
-            kickAvgVolume = kickAvgVolume / KICK_FREQUENCY_INDECIES;
+            kickAvgVolume = kickAvgVolume / (KICK_FREQUENCY_END - KICK_FREQUENCY_START);
             //console.log(kickAvgVolume);
 
             // If the average kick volume is above a certain dB threshold, 
             // calcualte newRadius
             // NOTE: for WebAudio API, max dB for a given frequency data point is 256
-            if (kickAvgVolume > 230) {
-                newRadius = radius + (radius - (radius * (kickAvgVolume / 256)));
-                isBouncing = true;  // set isBoucing to true for lerpPercent values
+            if (kickAvgVolume > KICK_BOUNCE_THRESHOLD) {
+                newRadius = radius + (radius - (radius * (kickAvgVolume / AUDIODATA_MAX_VOLUME)));
+                //isBouncing = true;  // set isBoucing to true for lerpPercent values
             }
-            else
-            {
+            else {
                 // if no kick is detected, set newRadius to radius
                 newRadius = radius;
             }
 
-            // if the newRadius hasn't changed, we're no longer bouncing
-            isBouncing = !(newRadius == radius);
+            radiusDifference = newRadius - radius;
 
-            // if we are bouncing icnreanemt bounceLerpPercent for smooth bounce transition outwards
-            if (isBouncing) {
-                // Only increameent lerp if we are below the max lerp threshold (1)
-                if (!(bounceLerpPercent >= 1)) {
-                    bounceLerpPercent += .05;
-                } else {
-                    // If we are at the max lerp threshold, stop bouncing and lerp inwards
-                    bounceLerpPercent = -.05;
-                    isBouncing = false;
-                }
-            } else {
-                // if we are not bouncing, lerp inwards
-                if (bounceLerpPercent > 0) {
-                    bounceLerpPercent -= .05;
-                }
-            }
+            if (radiusDifference != 0)
+                bounceLerpPercent = radiusDifference / radius;
 
             // lerp between radius and newRadius
             radius = utils.lerp(newRadius, radius, bounceLerpPercent);
@@ -158,34 +146,74 @@ function draw(params = {}) {
         ctx.restore();
     }
 
+    if (params.showWaveform) {
+        ctx.save();
+
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        let sliceWidth = canvasWidth / bufferLength;
+        let x = 0;
+        let sliceData;
+        let sliceImage;
+
+        for (let i = 0; i < bufferLength; i++) {
+
+            let v = audioData[i] / bufferLength;
+            let y = v * (waveformHeight / 2) / 2;
+
+            if (i === 0) {
+                ctx.moveTo(x, (waveformHeight / 2) - y);
+            } else {
+                ctx.lineTo(x, (waveformHeight / 2) - y);
+            }
+
+            x += sliceWidth;
+        }
+
+        ctx.lineTo(canvasWidth, (waveformHeight / 2));
+        ctx.stroke();
+
+        ctx.restore();
+
+        x = 0;
+    }
+
+
+
     // 5 - draw circles
     if (params.showCircles) {
         let maxRadius = 100;//canvasHeight / 4;
         ctx.save();
-        ctx.globalAplha = 0.5;
+        ctx.globalAplha = 0.75;
         for (let i = 0; i < audioData.length; i += 4) {
             // red-ish circles
             let percent = audioData[i] / 255;
             let colorPercent = Math.abs(i / audioData.length + colorRotation);
 
             let circleRadius = percent * maxRadius;
+
+            // 
             ctx.beginPath();
             //ctx.fillStyle = `hsl(${360 * colorPercent},75%,75%)`;
-            ctx.fillStyle = utils.makeColor(246, 246, 246, .2);
+            ctx.fillStyle = utils.makeColor(246, 246, 246, .3);
             ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
             ctx.fill();
             ctx.closePath();
+
 
             // blue-ish circles, bigger, more transparent
             ctx.beginPath();
-            ctx.fillStyle = utils.makeColor(246, 246, 246, .2);
+            ctx.fillStyle = utils.makeColor(246, 246, 246, .3);
             ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
             ctx.fill();
             ctx.closePath();
 
+
             // yellow-ush circles, smaller
             ctx.beginPath();
-            ctx.fillStyle = utils.makeColor(10, 10, 10, .2);
+            ctx.fillStyle = utils.makeColor(246, 246, 246, .3);
             ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
             ctx.fill();
             ctx.closePath();
@@ -194,13 +222,14 @@ function draw(params = {}) {
         ctx.restore();
     }
 
+    // show date
     if (params.showDate) {
         let spacing = 11;
         ctx.save();
         ctx.font = "22px 'Heebo', sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = `hsl(${360 * (colorRotation / 2)},75%,75%)`;
+        ctx.fillStyle = `hsl(${360 * (colorRotation / 2)},75%,50%)`;
         ctx.fillText(utils.getDate(), canvasWidth / 2, (canvasHeight / 2) - spacing);
         ctx.fillText(utils.getTime(), canvasWidth / 2, (canvasHeight / 2) + spacing);
         // ctx.strokeStyle = "black";
@@ -210,24 +239,56 @@ function draw(params = {}) {
         ctx.restore();
     }
 
-    if (params.showConfetti) {
-        let kickAvgVolume = 0;
+    if (params.showPixels)
+    {
+        let sliceWidth = canvasWidth / bufferLength;
+        let x = 0;
+        let sliceData;
+        let sliceImage;
 
         ctx.save();
 
-        for (let i = 0; i < 8; i++) {
-            kickAvgVolume += audioData[i];
-        }
+        for (let i = 0; i < bufferLength; i++) {
 
-        kickAvgVolume = kickAvgVolume / 8;
+            let v = audioData[i] / bufferLength;
+            let y = v * (waveformHeight / 2) / 2;
 
-        //console.log("avg Kick volume = " + kickAvgVolume);
+            sliceImage = ctx.getImageData(x, (waveformHeight / 2) - y, sliceWidth, 10);
+            sliceData = sliceImage.data;
 
-        if (kickAvgVolume > 230) {
-            //drawConfetti();
+            for (let i = 0; i < sliceData.length; i += 4) {
+                    let red = sliceData[i], green = sliceData[i + 1], blue = sliceData[i + 2];
+                    sliceData[i] = 255 - red;
+                    sliceData[i + 1] = 255 - green;
+                    sliceData[i + 2] = 255 - blue;
+            }
+
+            ctx.putImageData(sliceImage, x, (5 + (waveformHeight / 2) - y));
+
+            x += sliceWidth;
         }
 
         ctx.restore();
+    }
+
+    if (params.showConfetti) {
+        let avgSnareVolume = 0;
+        const SNARE_FREQUENCY_START = 5;
+        const SNARE_FREQUENCY_END = 15;
+
+        const WIDTH_BOUNDS = 50;
+        const HEIGHT_BOUNDS = 50;
+        let randomX = utils.getRandom(WIDTH_BOUNDS, canvasWidth - WIDTH_BOUNDS);
+        let randomY = utils.getRandom(HEIGHT_BOUNDS, canvasWidth - HEIGHT_BOUNDS);
+        let canvasWidthFourth = canvasWidth / 4;
+
+        for (let i = SNARE_FREQUENCY_START; i < SNARE_FREQUENCY_END; i++) {
+            avgSnareVolume += audioData[i];
+        }
+
+        avgSnareVolume = avgSnareVolume / (SNARE_FREQUENCY_END - SNARE_FREQUENCY_START);
+
+        //console.log(avgSnareVolume);
     }
 
     // 6 - bitmap manipulation
@@ -243,6 +304,7 @@ function draw(params = {}) {
     let data = imageData.data;
     let length = data.length;
     let width = imageData.width; // not using here
+    //let length = imageData.length;
 
 
     // Emboss effect
@@ -283,25 +345,6 @@ function draw(params = {}) {
 
     colorRotation += .001;
 
-}
-
-let maxConfetti = 10;
-let confettiSize = 10;
-
-function drawConfetti() {
-    for (let i = 0; i < maxConfetti; i++) {
-        ctx.beginPath();
-        //ctx.fillStyle = `hsl(${360 * colorPercent},75%,75%)`;
-        ctx.fillStyle = utils.getRandomColor();
-        ctx.arc(utils.getRandom(50, canvasWidth - 50),
-            utils.getRandom(50, canvasHeight - 50),
-            confettiSize,
-            0,
-            2 * Math.PI,
-            false);
-        ctx.fill();
-        ctx.closePath();
-    }
 }
 
 export { setupCanvas, draw };
