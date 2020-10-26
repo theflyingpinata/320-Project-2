@@ -181,6 +181,85 @@ function draw(params = {}, waveformHeight) {
     }
 
 
+    // Circluar waveform
+    if (params.showWaveform) {
+        
+        let theta = Math.PI * 2 / bufferLength;
+        let currentAngle = -Math.PI/2 + colorRotation;//Math.PI;// + colorRotation;
+
+        let radius = 100;
+        let formHeight = 75;
+        ctx.save();
+
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        let v, y, newX, newY;
+        if (params.showBounce) {
+            let kickAvgVolume = 0;  // Average volume of the kick frequencies (100Hz - 1.3K Hz)
+            let newRadius;  // New radius to lerp to when a kick happens
+            let radiusDifference;
+
+            // Calcualte average kick volume
+            for (let i = KICK_FREQUENCY_START; i < KICK_FREQUENCY_END; i++) {
+                kickAvgVolume += audioData[i];
+            }
+
+            kickAvgVolume = kickAvgVolume / (KICK_FREQUENCY_END - KICK_FREQUENCY_START);
+            //console.log(kickAvgVolume);
+
+            // If the average kick volume is above a certain dB threshold, 
+            // calcualte newRadius
+            // NOTE: for WebAudio API, max dB for a given frequency data point is 256
+            if (kickAvgVolume > KICK_BOUNCE_THRESHOLD) {
+                newRadius = radius + (radius - (radius * (kickAvgVolume / AUDIODATA_MAX_VOLUME)));
+                //isBouncing = true;  // set isBoucing to true for lerpPercent values
+            }
+            else {
+                // if no kick is detected, set newRadius to radius
+                newRadius = radius;
+            }
+
+            radiusDifference = newRadius - radius;
+
+            if (radiusDifference != 0)
+                bounceLerpPercent = radiusDifference / radius;
+
+            // lerp between radius and newRadius
+            radius = utils.lerp(newRadius, radius, bounceLerpPercent);
+        }
+        function calculateWave(index) {
+            v = audioData[index] / 256;
+            y = v * formHeight + radius;//waveformHeight / 2);// / 2;
+
+            newX = (y * Math.cos(currentAngle));
+            newY = (y * Math.sin(currentAngle));
+        }
+
+        ctx.translate(canvasWidth / 2, canvasHeight / 2);
+        // going out
+        for (let i = 0; i < bufferLength; i++) {
+
+
+            calculateWave(i);
+            if (i === 0) {
+                ctx.moveTo(newX, newY);
+            } else {
+                ctx.lineTo(newX, newY);
+            }
+
+            currentAngle += theta;
+        }
+
+        calculateWave(0);
+        ctx.lineTo(newX, newY);
+        ctx.stroke();
+        ctx.restore();
+
+
+    }
+
 
     // 5 - draw circles
     if (params.showCircles) {

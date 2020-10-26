@@ -22,7 +22,7 @@ const drawParams = {
   showDate: true,
   showConfetti: true,
   showBounce: true,
-  showWaveform: false,
+  showWaveform: true,
   showPixels: true,
 }
 
