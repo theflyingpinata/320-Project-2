@@ -224,9 +224,9 @@ function draw(params = {}, waveformHeight) {
 
     // show date
     if (params.showDate) {
-        let spacing = 11;
+        let spacing = 15;
         ctx.save();
-        ctx.font = "22px 'Heebo', sans-serif";
+        ctx.font = "30px 'Bebas Neue', cursive";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillStyle = `hsl(${360 * (colorRotation / 2)},75%,50%)`;
@@ -253,7 +253,7 @@ function draw(params = {}, waveformHeight) {
             let v = audioData[i] / bufferLength;
             let y = v * (waveformHeight / 2) / 2;
 
-            sliceImage = ctx.getImageData(x, (waveformHeight / 2) - y, sliceWidth, 10);
+            sliceImage = ctx.getImageData(x, (waveformHeight / 2) - y, sliceWidth, canvasHeight - ((waveformHeight / 2) - y));
             sliceData = sliceImage.data;
 
             for (let i = 0; i < sliceData.length; i += 4) {
