@@ -8,6 +8,7 @@
 */
 
 import * as utils from './utils.js';
+import * as audio from './audio.js';
 
 let ctx, canvasWidth, canvasHeight, gradient, analyserNode, audioData;
 let bufferLength;
@@ -256,8 +257,6 @@ function draw(params = {}, waveformHeight) {
         ctx.lineTo(newX, newY);
         ctx.stroke();
         ctx.restore();
-
-
     }
 
 
@@ -298,6 +297,22 @@ function draw(params = {}, waveformHeight) {
             ctx.closePath();
 
         }
+        ctx.restore();
+    }
+
+    if(params.showProgress) {
+        ctx.save();
+        let radius = 75;
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+        ctx.translate(canvasWidth / 2, canvasHeight/ 2);
+        let angle = Math.PI * 2 * (audio.element.currentTime / audio.element.duration);
+        ctx.arc(0,0, radius, 0 + colorRotation - (Math.PI / 2), angle + colorRotation - (Math.PI / 2), false);
+        ctx.stroke();
+        ctx.closePath();
+
         ctx.restore();
     }
 

@@ -19,6 +19,7 @@ const drawParams = {
   showInvert: false,
   showEmboss: false,
   showBarCircle: true,
+  showProgress: true,
   showDate: true,
   showBounce: true,
   showWaveform: true,
@@ -150,6 +151,9 @@ function setupUI(canvasElement) {
   };
   document.querySelector('#circleWaveformCB').onchange = e => {
     drawParams.showCircleWaveform = e.target.checked;
+  };
+  document.querySelector('#progressCB').onchange = e => {
+    drawParams.showProgress = e.target.checked;
   };
   document.querySelector('#waveformCB').onchange = e => {
     drawParams.showWaveform = e.target.checked;
