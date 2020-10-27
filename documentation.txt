@@ -1,0 +1,8 @@
+I think our visualizer looks pretty cool. It also has a lot of options for the the user to select.
+We added a bunch of circular thinks for the visualizer, and we added some some things for flowy waveforms.
+We have all the requirements for Media.
+Our code builds on what we did in class, furthering it by adding more options.
+
+If we had more time, we would add more interesting things for the waveforms.
+
+We deserve an 100% because if this was someone else's visualizer, we would vibe hard to it. The rainbow colors add a lot to it.
