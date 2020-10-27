@@ -173,6 +173,9 @@ function setupUI(canvasElement) {
 function loop() {
   /* NOTE: This is temporary testing code that we will delete in Part II */
   requestAnimationFrame(loop);
+  let minutes = Math.floor(audio.element.currentTime/60).toString().padStart(2, "0");
+  let seconds = Math.floor(audio.element.currentTime%60).toString().padStart(2, "0");
+  document.querySelector("#progress").innerHTML = `${minutes}:${seconds}`;
   canvas.draw(drawParams, waveformHeight);
 }
 
