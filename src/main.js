@@ -20,10 +20,12 @@ const drawParams = {
   showEmboss: false,
   showBarCircle: true,
   showDate: true,
-  showConfetti: true,
   showBounce: true,
-  showWaveform: false,
+  showWaveform: true,
   showPixels: true,
+  showCircleWaveform: true,
+  showGrayscale: false,
+  showSepia: false,
 }
 
 let waveformHeight = 200;
@@ -146,14 +148,20 @@ function setupUI(canvasElement) {
   document.querySelector('#bounceCB').onchange = e => {
     drawParams.showBounce = e.target.checked;
   };
-  document.querySelector('#confettiCB').onchange = e => {
-    drawParams.showConfetti = e.target.checked;
+  document.querySelector('#circleWaveformCB').onchange = e => {
+    drawParams.showCircleWaveform = e.target.checked;
   };
   document.querySelector('#waveformCB').onchange = e => {
     drawParams.showWaveform = e.target.checked;
   };
   document.querySelector('#pixelsCB').onchange = e => {
     drawParams.showPixels = e.target.checked;
+  };
+  document.querySelector('#grayscaleCB').onchange = e => {
+    drawParams.showGrayscale = e.target.checked;
+  };
+  document.querySelector('#sepiaCB').onchange = e => {
+    drawParams.showSepia = e.target.checked;
   };
 
 } // end setupUI

@@ -181,6 +181,85 @@ function draw(params = {}, waveformHeight) {
     }
 
 
+    // Circluar waveform
+    if (params.showCircleWaveform) {
+
+        let theta = Math.PI * 2 / bufferLength;
+        let currentAngle = -Math.PI / 2 + colorRotation;//Math.PI;// + colorRotation;
+
+        let radius = 100;
+        let formHeight = 75;
+        ctx.save();
+
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        let v, y, newX, newY;
+        if (params.showBounce) {
+            let kickAvgVolume = 0;  // Average volume of the kick frequencies (100Hz - 1.3K Hz)
+            let newRadius;  // New radius to lerp to when a kick happens
+            let radiusDifference;
+
+            // Calcualte average kick volume
+            for (let i = KICK_FREQUENCY_START; i < KICK_FREQUENCY_END; i++) {
+                kickAvgVolume += audioData[i];
+            }
+
+            kickAvgVolume = kickAvgVolume / (KICK_FREQUENCY_END - KICK_FREQUENCY_START);
+            //console.log(kickAvgVolume);
+
+            // If the average kick volume is above a certain dB threshold, 
+            // calcualte newRadius
+            // NOTE: for WebAudio API, max dB for a given frequency data point is 256
+            if (kickAvgVolume > KICK_BOUNCE_THRESHOLD) {
+                newRadius = radius + (radius - (radius * (kickAvgVolume / AUDIODATA_MAX_VOLUME)));
+                //isBouncing = true;  // set isBoucing to true for lerpPercent values
+            }
+            else {
+                // if no kick is detected, set newRadius to radius
+                newRadius = radius;
+            }
+
+            radiusDifference = newRadius - radius;
+
+            if (radiusDifference != 0)
+                bounceLerpPercent = radiusDifference / radius;
+
+            // lerp between radius and newRadius
+            radius = utils.lerp(newRadius, radius, bounceLerpPercent);
+        }
+        function calculateWave(index) {
+            v = audioData[index] / 256;
+            y = v * formHeight + radius;//waveformHeight / 2);// / 2;
+
+            newX = (y * Math.cos(currentAngle));
+            newY = (y * Math.sin(currentAngle));
+        }
+
+        ctx.translate(canvasWidth / 2, canvasHeight / 2);
+        // going out
+        for (let i = 0; i < bufferLength; i++) {
+
+
+            calculateWave(i);
+            if (i === 0) {
+                ctx.moveTo(newX, newY);
+            } else {
+                ctx.lineTo(newX, newY);
+            }
+
+            currentAngle += theta;
+        }
+
+        calculateWave(0);
+        ctx.lineTo(newX, newY);
+        ctx.stroke();
+        ctx.restore();
+
+
+    }
+
 
     // 5 - draw circles
     if (params.showCircles) {
@@ -239,8 +318,7 @@ function draw(params = {}, waveformHeight) {
         ctx.restore();
     }
 
-    if (params.showPixels)
-    {
+    if (params.showPixels) {
         let sliceWidth = canvasWidth / bufferLength;
         let x = 0;
         let sliceData;
@@ -257,10 +335,10 @@ function draw(params = {}, waveformHeight) {
             sliceData = sliceImage.data;
 
             for (let i = 0; i < sliceData.length; i += 4) {
-                    let red = sliceData[i], green = sliceData[i + 1], blue = sliceData[i + 2];
-                    sliceData[i] = 255 - red;
-                    sliceData[i + 1] = 255 - green;
-                    sliceData[i + 2] = 255 - blue;
+                let red = sliceData[i], green = sliceData[i + 1], blue = sliceData[i + 2];
+                sliceData[i] = 255 - red;
+                sliceData[i + 1] = 255 - green;
+                sliceData[i + 2] = 255 - blue;
             }
 
             ctx.putImageData(sliceImage, x, (5 + (waveformHeight / 2) - y));
@@ -269,26 +347,6 @@ function draw(params = {}, waveformHeight) {
         }
 
         ctx.restore();
-    }
-
-    if (params.showConfetti) {
-        let avgSnareVolume = 0;
-        const SNARE_FREQUENCY_START = 5;
-        const SNARE_FREQUENCY_END = 15;
-
-        const WIDTH_BOUNDS = 50;
-        const HEIGHT_BOUNDS = 50;
-        let randomX = utils.getRandom(WIDTH_BOUNDS, canvasWidth - WIDTH_BOUNDS);
-        let randomY = utils.getRandom(HEIGHT_BOUNDS, canvasWidth - HEIGHT_BOUNDS);
-        let canvasWidthFourth = canvasWidth / 4;
-
-        for (let i = SNARE_FREQUENCY_START; i < SNARE_FREQUENCY_END; i++) {
-            avgSnareVolume += audioData[i];
-        }
-
-        avgSnareVolume = avgSnareVolume / (SNARE_FREQUENCY_END - SNARE_FREQUENCY_START);
-
-        //console.log(avgSnareVolume);
     }
 
     // 6 - bitmap manipulation
@@ -334,6 +392,24 @@ function draw(params = {}, waveformHeight) {
             data[i] = 255 - red;
             data[i + 1] = 255 - green;
             data[i + 2] = 255 - blue;
+        }
+
+        // reference: https://www.phpied.com/pixel-manipulation-in-canvas/
+        // grayscale
+        if (params.showGrayscale) {
+            let red = data[i], green = data[i + 1], blue = data[i + 2];
+            let grayscale = .2126 * red + .7152 * green + .0722 * blue;
+            data[i] = data[i + 1] = data[i + 2] = grayscale;
+        }
+
+        // sepia
+        if (params.showSepia)
+        {
+            let red = data[i], green = data[i + 1], blue = data[i + 2];
+            let sepia = 0.3 * red + 0.59 * green + 0.11 * blue;
+            data[i] = sepia + 75;
+            data[i + 1] = sepia + 50;
+            data[i + 2]= sepia + 25;
         }
     } // end for
 

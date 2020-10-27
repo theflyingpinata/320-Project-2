@@ -1,6 +1,8 @@
 body {
-	background: #eeeeee;
-	font-family: tahoma, verdana, sans serif;
+	background: #353434;
+  font-family: 'Heebo', cursive;
+  font-size: 16px;
+  color: #fafafa;
 }
 
 canvas {
@@ -39,4 +41,71 @@ button[data-playing="no"]:after{
 #fsButton{
   font-size: 1.2rem;
   width: 8rem;
+}
+
+main {
+  margin: auto;
+  width: 70vw;
+}
+
+canvas {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  width: 800px;
+}
+
+#controls {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  align-content: center;
+  justify-content: space-around;
+  border-radius: 5px;
+}
+
+#controls section {
+  margin: .5em;
+}
+
+#buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  margin: .5em;
+}
+
+#checkboxes div{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  align-content: center;
+  justify-content: space-around;
+  margin: .5em;
+}
+
+#checkboxes div span {
+  margin: .2em;
+  padding: .2em;
+  width: 5em;
+  flex-grow: 1;
+  border: 3px solid #243f97;
+  border-radius: 5px;
+}
+
+#sliders {
+  display: flex;
+  flex-direction: column;
+}
+
+#sliders div {
+  height: 5em;
+  border: 3px solid #243f97;
+  border-radius: 5px;
+  margin: .7em;
 }
