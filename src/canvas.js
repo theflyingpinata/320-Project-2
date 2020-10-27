@@ -260,46 +260,6 @@ function draw(params = {}, waveformHeight) {
     }
 
 
-    // 5 - draw circles
-    if (params.showCircles) {
-        let maxRadius = 100;//canvasHeight / 4;
-        ctx.save();
-        ctx.globalAplha = 0.75;
-        for (let i = 0; i < audioData.length; i += 4) {
-            // red-ish circles
-            let percent = audioData[i] / 255;
-            let colorPercent = Math.abs(i / audioData.length + colorRotation);
-
-            let circleRadius = percent * maxRadius;
-
-            // 
-            ctx.beginPath();
-            //ctx.fillStyle = `hsl(${360 * colorPercent},75%,75%)`;
-            ctx.fillStyle = utils.makeColor(246, 246, 246, .3);
-            ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-
-            // blue-ish circles, bigger, more transparent
-            ctx.beginPath();
-            ctx.fillStyle = utils.makeColor(246, 246, 246, .3);
-            ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-
-            // yellow-ush circles, smaller
-            ctx.beginPath();
-            ctx.fillStyle = utils.makeColor(246, 246, 246, .3);
-            ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-        }
-        ctx.restore();
-    }
-
     if(params.showProgress) {
         ctx.save();
         let radius = 75;
@@ -395,12 +355,6 @@ function draw(params = {}, waveformHeight) {
         // data[i+2] is the blue channel
         // data[i+3] is the alpha channel
 
-        if (params.showNoise && Math.random() < .05) {
-            data[i] = data[i + 1] = data[i + 2] = 0;// zero out the red and green and blue channels
-            data[i] = 255;// make the red channel 100% red
-            data[i + 1] = 255;
-            data[i + 2] = 0;
-        } // end if
 
         if (params.showInvert) {
             let red = data[i], green = data[i + 1], blue = data[i + 2];
